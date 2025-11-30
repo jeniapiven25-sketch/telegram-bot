@@ -1,20 +1,31 @@
 import telebot
 from flask import Flask, request
 
-TOKEN = "8466917474:AAEy8VuXV_jdknhn8oNZgbFVyOnqFi-nadI"
+# Inserisci qui il tuo token del bot
+TOKEN = "INSERISCI_IL_TUO_TOKEN"
+
+# Oggetto bot
 bot = telebot.TeleBot(TOKEN)
-app = Flask(_JP_bot__)
 
-@bot.message_handler(commands=['start'])
-def start(message):
-    bot.send_message(message.chat.id, "Ciao, sono AI asistente di Jenia Piven")
+# App Flask per Render (webhook)
+app = Flask(__name__)
 
-@app.route("/" + TOKEN, methods=["POST"])
+@app.route("/", methods=["GET"])
+def home():
+    return "Bot Python attivo su Render! 🚀"
+
+@app.route("/", methods=["POST"])
 def webhook():
-    update = request.stream.read().decode("utf-8")
-    bot.process_new_updates([telebot.types.Update.de_json(update)])
+    json_string = request.get_data().decode("utf-8")
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
     return "OK", 200
 
-@app.route("/")
-def default():
-    return "Bot is running!", 200
+# Risposta al comando /start
+@bot.message_handler(commands=["start"])
+def start(message):
+    bot.reply_to(message, "Ciao! Il bot Python è attivo! 😄")
+
+# Per test locale
+if __name__ == "__main__":
+    bot.polling(none_stop=True)
